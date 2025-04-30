@@ -1,24 +1,33 @@
 const express = require('express');
-const dotenv = require('dotenv');
+const cors = require('cors');
+const connectDB = require('./db'); // Import the connection function
+require('dotenv').config();
+
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 
-dotenv.config();
 const app = express();
+const PORT = process.env.PORT || 3000;
 
+// Middleware
+app.use(cors());
 app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 
-// 404 handler
+// Default route
+app.get('/', (req, res) => {
+  res.send('API is running 🚀');
+});
+
+// 404 Handler
 app.use((req, res) => {
-  res.status(404).json({ message: "Requested resource could not be found. 😐" });
+  res.status(404).json({ message: 'Not Found' });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+// Start server after DB connection
+connectDB().then(() => {
+  app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 });
-
